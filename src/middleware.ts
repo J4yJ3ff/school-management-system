@@ -1,68 +1,59 @@
 // src/middleware.ts
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth"; // Import the auth function
+import type { NextRequest } from "next/server";
+import {
+  apiAuthPrefix,
+  publicRoutes,
+  authRoutes,
+  DEFAULT_LOGIN_REDIRECT,
+} from "./route";
 
-// Define public routes (accessible without login)
-const publicRoutes = [
-  "/", // Homepage
-  "/about",
-  "/contact",
-  "/admissions", // Public info page
-  "/admissions-page",
-  "/facilities",
-  "/departments",
-  "/news",
-  "/gallery",
-  "/login",
-  "/register", // Add registration page if you have one
-  "/api/auth", // NextAuth API routes need to be accessible
-  // Add other public routes/api endpoints as needed
-];
-
-// Define auth routes (login, register) - redirect if logged in
-const authRoutes = ["/login", "/register"];
-
-export default auth(async (req) => {
+export function middleware(req: NextRequest) {
   const { nextUrl } = req;
-  const session = req.auth; // Get session directly from auth middleware
-  const isLoggedIn = !!session;
+  const isLoggedIn =
+    !!req.cookies.get("next-auth.session-token") ||
+    !!req.cookies.get("__Secure-next-auth.session-token");
 
+  const isApiAuthRoute = nextUrl.pathname.startsWith(apiAuthPrefix);
   const isPublicRoute = publicRoutes.some(
     (route) =>
-      nextUrl.pathname === route ||
-      (route.endsWith("/") && nextUrl.pathname.startsWith(route)) || // Handle root '/'
-      nextUrl.pathname.startsWith(route + "/") || // Handle sub-paths like /api/auth/*
-      nextUrl.pathname.match(new RegExp(`^${route.replace("*", ".*")}$`)) // Basic wildcard support if needed
+      nextUrl.pathname === route || nextUrl.pathname.startsWith(`${route}/`)
   );
   const isAuthRoute = authRoutes.includes(nextUrl.pathname);
 
-  // Allow NextAuth API calls
-  if (nextUrl.pathname.startsWith("/api/auth")) {
+  // Allow API auth routes to pass through
+  if (isApiAuthRoute) {
     return NextResponse.next();
   }
 
-  // If trying to access auth routes while logged in, redirect to dashboard
-  if (isAuthRoute && isLoggedIn) {
-    return NextResponse.redirect(new URL("/dashboard", nextUrl));
+  // Redirect authenticated users away from auth routes
+  if (isAuthRoute) {
+    if (isLoggedIn) {
+      return NextResponse.redirect(new URL(DEFAULT_LOGIN_REDIRECT, nextUrl));
+    }
+    return NextResponse.next();
   }
 
-  // If trying to access a protected route without being logged in, redirect to login
-  if (!isPublicRoute && !isLoggedIn) {
-    // Store the intended URL to redirect back after login
+  // Allow access to public routes
+  if (isPublicRoute) {
+    return NextResponse.next();
+  }
+
+  // Require authentication for protected routes
+  if (!isLoggedIn) {
     const callbackUrl = encodeURIComponent(nextUrl.pathname + nextUrl.search);
     return NextResponse.redirect(
       new URL(`/login?callbackUrl=${callbackUrl}`, nextUrl)
     );
   }
 
-  // Allow access if it's a public route or the user is logged in
   return NextResponse.next();
-});
+}
 
 // Define which paths the middleware should run on
 export const config = {
   matcher: [
     // Match all routes except static files and _next internal paths
-    "/((?!api/auth|api/webhooks|_next/static|_next/image|favicon.ico|assets/).*)",
+    "/((?!_next/static|_next/image|favicon.ico|assets/).*)",
   ],
 };

@@ -1,19 +1,17 @@
 // src/lib/auth.ts
 import NextAuth, {
-  NextAuthConfig,
-  DefaultSession,
-  User as NextAuthUser,
+  type NextAuthConfig,
+  type DefaultSession,
+  type User as NextAuthUser,
 } from "next-auth";
-import { MongoDBAdapter } from "@auth/mongodb-adapter"; // Import MongoDB Adapter
+import { MongoDBAdapter } from "@auth/mongodb-adapter";
 import Credentials from "next-auth/providers/credentials";
-import Google from "next-auth/providers/google"; // Example: Add Google Provider
 import bcrypt from "bcryptjs";
 
-import dbConnect, { clientPromise } from "./dbConnect"; // Import db connection util and clientPromise
-import { LoginSchema } from "@/schemas/auth.schema";
-import { UserRole } from "@/models/User.model"; // Import the enum from your model file
+import dbConnect, { clientPromise } from "./dbConnect";
+import { UserRole } from "@/database/User.model";
 import { getUserByEmail } from "./actions/User.actions";
-// We'll update this helper
+import { LoginSchema } from "@/schemas/auth.schema";
 
 // Extend session and user types
 declare module "next-auth" {
@@ -26,7 +24,7 @@ declare module "next-auth" {
 
   // The user object returned by authorize or callbacks
   interface User extends NextAuthUser {
-    id: string; // Use string for id in NextAuth context
+    _id: string; // Use string for id in NextAuth context
     role: UserRole;
   }
 }

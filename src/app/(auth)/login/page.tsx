@@ -4,12 +4,12 @@
 import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import type * as z from "zod";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation"; // To get callbackUrl
 
 import { LoginSchema } from "@/schemas/auth.schema";
-import { login } from "@/lib/actions/auth.actions"; // We'll create this action
+// Updated import path
 
 import {
   Card,
@@ -31,6 +31,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Loader2, Terminal } from "lucide-react";
+import { login } from "@/lib/actions/auth.actions";
 
 export default function LoginPage() {
   const searchParams = useSearchParams();
@@ -138,8 +139,7 @@ export default function LoginPage() {
                 </Alert>
               )}
               {success && (
-                <Alert variant="success">
-                  {" "}
+                <Alert>
                   {/* You might need to define a 'success' variant */}
                   <Terminal className="h-4 w-4" />
                   <AlertTitle>Success</AlertTitle>
@@ -171,7 +171,7 @@ export default function LoginPage() {
         </CardContent>
         <CardFooter className="flex flex-col items-center text-sm">
           <p>
-            Don't have an account? 
+            Don't have an account?
             <Link href="/register" className="underline hover:text-primary">
               Sign up
             </Link>

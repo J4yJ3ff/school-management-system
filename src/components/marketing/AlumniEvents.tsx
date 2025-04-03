@@ -1,13 +1,5 @@
-// src/components/marketing/AlumniEvents.tsx
-import React from "react";
 import Image from "next/image"; // Use Next.js Image
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card"; // Use Shadcn Card
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"; // Use Shadcn Card
 
 // Assuming Alumni2 image is in public/assets
 const alumniImage = "/assets/Alumni2.jpg";
@@ -60,7 +52,7 @@ const AlumniEvents = () => {
                 {" "}
                 {/* Container for Image */}
                 <Image
-                  src={event.imageUrl}
+                  src={event.imageUrl || "/placeholder.svg"}
                   alt={event.title}
                   layout="fill" // Fill the container
                   objectFit="cover" // Cover the area

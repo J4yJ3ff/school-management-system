@@ -1,7 +1,8 @@
-// src/data/user.ts
+"use server";
+
 import UserModel, { IUser } from "@/database/User.model";
 import dbConnect from "@/lib/dbConnect";
-// Import Mongoose model and interface
+
 import mongoose from "mongoose";
 
 export const getUserByEmail = async (

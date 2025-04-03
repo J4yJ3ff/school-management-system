@@ -1,5 +1,5 @@
-import mongoose, { Schema, Document, models, Model } from "mongoose";
-import { IUser } from "./User.model"; // Import User interface if needed
+import mongoose, { Schema, type Document, models, type Model } from "mongoose";
+import type { IUser } from "./User.model"; // Import User interface if needed
 
 export interface IStudent extends Document {
   userId: mongoose.Types.ObjectId | IUser; // Can hold ObjectId or populated User object

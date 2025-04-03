@@ -1,15 +1,5 @@
-import mongoose, { Schema, Document, models, Model } from "mongoose";
-import { AccountSchema } from "./Account.model"; // Import dependent schemas if needed
-import { SessionSchema } from "./Session.model";
-
-// Define enum values
-export enum UserRole {
-  ADMIN = "ADMIN",
-  STAFF = "STAFF",
-  TEACHER = "TEACHER",
-  STUDENT = "STUDENT",
-  PARENT = "PARENT",
-}
+import mongoose, { Schema, type Document, models, type Model } from "mongoose";
+import { UserRole } from "@/types"; // Import from types file instead of defining here
 
 export interface IUser extends Document {
   name?: string;

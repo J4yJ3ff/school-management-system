@@ -1,17 +1,18 @@
-// src/lib/actions/auth.actions.ts
 "use server";
 
-import * as z from "zod";
+import type * as z from "zod";
 import bcrypt from "bcryptjs";
 import { AuthError } from "next-auth";
 import mongoose from "mongoose";
 
 import { signIn, signOut as nextAuthSignOut } from "@/lib/auth";
-import dbConnect from "@/lib/dbConnect"; // Import Mongoose connect utility
-import UserModel, { UserRole } from "@/models/User.model"; // Import Mongoose User model
+import dbConnect from "@/lib/dbConnect";
+
 import { LoginSchema, RegisterSchema } from "@/schemas/auth.schema";
-import { DEFAULT_LOGIN_REDIRECT } from "@/routes";
+
 import { getUserByEmail } from "./User.actions";
+import UserModel, { UserRole } from "@/database/User.model";
+import { DEFAULT_LOGIN_REDIRECT } from "@/route";
 
 export const login = async (
   values: z.infer<typeof LoginSchema>,
@@ -20,7 +21,11 @@ export const login = async (
   await dbConnect(); // Ensure DB connection
 
   const validatedFields = LoginSchema.safeParse(values);
-  // ... validation ...
+
+  if (!validatedFields.success) {
+    return { error: "Invalid fields" };
+  }
+
   const { email, password } = validatedFields.data;
 
   // getUserByEmail already calls dbConnect and handles password selection
@@ -29,7 +34,6 @@ export const login = async (
   if (!existingUser || !existingUser.email || !existingUser.password) {
     return { error: "Invalid credentials!" };
   }
-  // ... rest of the logic using existingUser ...
 
   try {
     // signIn logic remains the same, relies on authorize in auth.ts
@@ -42,7 +46,12 @@ export const login = async (
   } catch (error) {
     // Error handling remains the same
     if (error instanceof AuthError) {
-      /* ... */
+      switch (error.type) {
+        case "CredentialsSignin":
+          return { error: "Invalid credentials!" };
+        default:
+          return { error: "Something went wrong!" };
+      }
     }
     console.error("Login Action Error:", error);
     return { error: "An unexpected error occurred during login." };
@@ -53,7 +62,11 @@ export const register = async (values: z.infer<typeof RegisterSchema>) => {
   await dbConnect(); // Ensure DB connection
 
   const validatedFields = RegisterSchema.safeParse(values);
-  // ... validation ...
+
+  if (!validatedFields.success) {
+    return { error: "Invalid fields" };
+  }
+
   const { email, password, name, role } = validatedFields.data;
 
   const existingUser = await getUserByEmail(email); // Check if email exists

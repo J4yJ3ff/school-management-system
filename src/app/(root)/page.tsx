@@ -1,29 +1,9 @@
-// src/app/(marketing)/layout.tsx
-import Footer from "@/components/marketing/Footer";
-import Header from "@/components/marketing/Header";
-
-export default function MarketingLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  return (
-    <div className="flex min-h-screen flex-col">
-      <Header />
-      <main className="flex-grow">{children}</main>
-      <Footer />
-    </div>
-  );
-}
-
-// src/app/(marketing)/page.tsx
-import React from "react";
 import Image from "next/image";
-import Link from "next/link";
-import EventSection from "@/components/marketing/EventSection"; // Adjust path after refactoring
+import Link from "next/link"; // Adjust path after refactoring
 import NewsCard from "@/components/marketing/NewsCard"; // Adjust path after refactoring
 import FaqSection from "@/components/marketing/FaqSection"; // Create or refactor this
 import { Button } from "@/components/ui/button";
+import AlumniEvents from "@/components/marketing/AlumniEvents";
 
 // Assume images are in public/assets
 const heroImage = "/assets/Image.JPG";
@@ -62,7 +42,7 @@ const HomePage = () => {
         <div className="container mx-auto px-4 grid md:grid-cols-2 gap-12 items-center">
           <div className="relative h-80 md:h-96 rounded-lg overflow-hidden shadow-lg">
             <Image
-              src={aboutImage}
+              src={aboutImage || "/placeholder.svg"}
               alt="About Us KBHS"
               layout="fill"
               objectFit="cover"
@@ -123,7 +103,7 @@ const HomePage = () => {
       </section>
 
       {/* Events Section - Import your refactored EventSection */}
-      <EventSection />
+      <AlumniEvents />
 
       {/* News Section - Import your refactored NewsCard */}
       <NewsCard />

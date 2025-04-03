@@ -1,4 +1,3 @@
-// src/app/(dashboard)/students/page.tsx
 import Link from "next/link";
 import { PlusCircle } from "lucide-react";
 
@@ -10,9 +9,9 @@ import {
   CardDescription,
   CardContent,
 } from "@/components/ui/card";
-import { getStudents } from "@/lib/actions/student.actions"; // Fetch data using Server Action
-import { StudentDataTable } from "./_components/student-data-table"; // Create this component
-import { studentColumns } from "./_components/student-columns"; // Define table columns
+import { getStudents } from "@/lib/actions/student.actions";
+import { StudentDataTable } from "@/components/student-data-table";
+import { studentColumns } from "@/components/student-columns";
 
 export default async function StudentsPage() {
   // Fetch students on the server
@@ -24,19 +23,14 @@ export default async function StudentsPage() {
       <p className="text-red-500">Error loading students: {result.error}</p>
     );
   }
-  if (!result.data) {
-    return <p>No student data found.</p>;
-  }
 
-  const students = result.data;
+  const students = result.data || [];
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">Student Management</h1>
-        <Link href="/students/new">
-          {" "}
-          {/* Or use a Dialog */}
+        <Link href="/dashboard/students/new">
           <Button>
             <PlusCircle className="mr-2 h-4 w-4" /> Add New Student
           </Button>

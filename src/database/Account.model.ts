@@ -1,4 +1,4 @@
-import mongoose, { Schema, Document, models, Model } from "mongoose";
+import mongoose, { Schema, type Document, models, type Model } from "mongoose";
 
 export interface IAccount extends Document {
   userId: mongoose.Types.ObjectId;

@@ -1,26 +1,22 @@
-// src/lib/actions/student.actions.ts
 "use server";
 
 import dbConnect from "@/lib/dbConnect";
-import StudentModel from "@/models/Student.model"; // Import Mongoose model
+import { StudentModel, UserModel, UserRole } from "@/database";
 import { auth } from "@/lib/auth";
-import { UserRole } from "@/models/User.model"; // Import enum from model
 import { revalidatePath } from "next/cache";
-import { z } from "zod";
+import { StudentSchema } from "@/schemas/student.schema";
+import type * as z from "zod";
 import mongoose from "mongoose";
-import UserModel from "@/models/User.model"; // Needed for creation transaction
 import bcrypt from "bcryptjs";
-
-// ... (keep StudentSchema for validation) ...
 
 export async function getStudents() {
   await dbConnect(); // Ensure connection
   const session = await auth();
-  // ... (role check remains the same) ...
+
   if (
     !session?.user ||
     ![UserRole.ADMIN, UserRole.STAFF, UserRole.TEACHER].includes(
-      session.user.role
+      session.user.role as UserRole
     )
   ) {
     return { error: "Unauthorized" };
@@ -29,7 +25,7 @@ export async function getStudents() {
   try {
     // Use Mongoose find, populate the 'user' field, use lean
     const students = await StudentModel.find({})
-      .populate<{ userId: typeof UserModel }>("userId") // Specify type for populated field
+      .populate("userId") // Populate the user data
       .sort({ createdAt: -1 }) // Use -1 for descending
       .lean()
       .exec();
@@ -58,16 +54,16 @@ export async function getStudents() {
 // Action to add a new student (using Mongoose Transaction)
 export async function addStudent(values: z.infer<typeof StudentSchema>) {
   const session = await auth();
-  // ... (role check) ...
+
   if (
     !session?.user ||
-    ![UserRole.ADMIN, UserRole.STAFF].includes(session.user.role)
+    ![UserRole.ADMIN, UserRole.STAFF].includes(session.user.role as UserRole)
   ) {
     return { error: "Unauthorized to add students" };
   }
 
   const validatedFields = StudentSchema.safeParse(values);
-  // ... (validation) ...
+
   if (!validatedFields.success) {
     return {
       error: "Invalid student data",
@@ -139,8 +135,6 @@ export async function addStudent(values: z.infer<typeof StudentSchema>) {
     revalidatePath("/dashboard/students");
     // revalidatePath(`/students/${newStudent._id.toString()}`); // Use _id
 
-    // Log audit trail (using newStudent._id)
-
     // Return lean object with string IDs
     const createdStudent = await StudentModel.findById(newStudent._id)
       .populate("userId")
@@ -158,5 +152,3 @@ export async function addStudent(values: z.infer<typeof StudentSchema>) {
     mongoSession.endSession(); // End the session
   }
 }
-
-// Refactor getStudentById, updateStudent, deleteStudent similarly using Mongoose methods.
